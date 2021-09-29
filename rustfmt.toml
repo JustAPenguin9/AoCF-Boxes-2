@@ -1,2 +1,3 @@
-# tabs > spaces
 hard_tabs = true
+newline_style = "Unix"
+use_small_heuristics = "Max"

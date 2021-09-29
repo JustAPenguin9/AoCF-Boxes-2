@@ -6,6 +6,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ansi_term = "0.12.1"
+clap = "2.33.3"
 csv = "1.1.6"
 image = "0.23.14"
 imageproc = "0.22.0"

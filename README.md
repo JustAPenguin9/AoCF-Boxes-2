@@ -4,7 +4,7 @@ i swear it will actually be good this time
 
 ### current format for the csv file
 ```
-path to image folder (including the "/" at the end)
+path to image folder (including the "/" at the end), padding top, padding left, padding bottom, padding right 
 image, x crop, y crop, matrix30, matrix31
 [coll OR hurt OR hit], width,  height, x offset, y offset
 image, x crop, y crop, matrix30, matrix31
