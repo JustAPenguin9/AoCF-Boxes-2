@@ -20,7 +20,7 @@ fn main() {
 		.arg(Arg::with_name("verbose")
 			.short("v")
 			.long("verbose")
-			.help("prints out more to aid in debugging"))
+			.help("Prints out more to aid in debugging"))
 		.arg(Arg::with_name("csv_file")
 			.help("location to the csv file [REQUIRED]")
 			.index(1)
@@ -30,7 +30,7 @@ fn main() {
 	/* CREATE AN OUTPUT DIR IF NONE EXIST ALREADY */
 	if !Path::new("output").is_dir() {
 		create_dir("output").unwrap_or_else(|_| {
-			println!("{}", Red.bold().paint("error: could not create an output dir"));
+			println!("{}", Red.bold().paint("error:\tcould not create an output dir"));
 			std::process::exit(101);
 		});
 		if matches.is_present("verbose") {
@@ -49,14 +49,23 @@ fn main() {
 		.unwrap_or_else(|_| {
 			println!(
 				"{}",
-				Red.bold().paint("error: could not create a reader based on the csv file")
+				Red.bold().paint(
+					"error:\tcould not create a reader based on the csv file
+\tdid you misspell the file name?"
+				)
 			);
 			std::process::exit(101);
 		});
-	let records = rdr.deserialize().collect::<Result<Vec<Row>, csv::Error>>()
-		.unwrap_or_else( |_| {
-			println!("{}", Red.bold().paint("error: error deserializing the csv file
-       maybe the data wasn't included correctly? the header should have 4 columbs and each row shold have 6 columbs"));
+	let records =
+		rdr.deserialize().collect::<Result<Vec<Row>, csv::Error>>().unwrap_or_else(|_| {
+			println!(
+				"{}",
+				Red.bold().paint(
+					"error:\terror deserializing the csv file
+\tdid you not include the data correctly? there should
+\tonly be 5 columbs in the file and no numbers with decimals."
+				)
+			);
 			std::process::exit(65);
 		});
 
@@ -68,7 +77,7 @@ fn main() {
 		println!(
 			"{}",
 			Red.bold()
-				.paint("error: the top padding in the header of the csv file is not a number")
+				.paint("error:\tthe top padding in the header of the csv file is not a number")
 		);
 		std::process::exit(65);
 	});
@@ -76,7 +85,7 @@ fn main() {
 		println!(
 			"{}",
 			Red.bold()
-				.paint("error: the left padding in the header of the csv file is not a number")
+				.paint("error:\tthe left padding in the header of the csv file is not a number")
 		);
 		std::process::exit(65);
 	});
@@ -84,7 +93,7 @@ fn main() {
 		println!(
 			"{}",
 			Red.bold()
-				.paint("error: the bottom padding in the header of the csv file is not a number")
+				.paint("error:\tthe bottom padding in the header of the csv file is not a number")
 		);
 		std::process::exit(65);
 	});
@@ -92,7 +101,7 @@ fn main() {
 		println!(
 			"{}",
 			Red.bold()
-				.paint("error: the right padding in the header of the csv file is not a number")
+				.paint("error:\tthe right padding in the header of the csv file is not a number")
 		);
 		std::process::exit(65);
 	});
@@ -111,7 +120,7 @@ fn main() {
 		.unwrap_or_else(|_| {
 			println!(
 				"{}",
-				Red.bold().paint("error: could not open the first image in the csv file")
+				Red.bold().paint("error:\tcould not open the first image in the csv file")
 			);
 			std::process::exit(65);
 		});
@@ -174,7 +183,7 @@ fn main() {
 						println!(
 							"{}",
 							Red.bold()
-								.paint(format!("error: could not save the image {}", sprite_name))
+								.paint(format!("error:\tcould not save the image {}", sprite_name))
 						);
 						std::process::exit(101);
 					});
@@ -196,7 +205,7 @@ fn main() {
 							println!(
 								"{}",
 								Red.bold().paint(format!(
-									"error: could not open the image on line {}",
+									"error:\tcould not open the image on line {}",
 									i + 2
 								))
 							);
@@ -214,7 +223,7 @@ fn main() {
 	img.save(format!("output/{}", sprite_name)).unwrap_or_else(|_| {
 		println!(
 			"{}",
-			Red.bold().paint(format!("error: could not save the image {}", sprite_name))
+			Red.bold().paint(format!("error:\tcould not save the image {}", sprite_name))
 		);
 		std::process::exit(101);
 	});
