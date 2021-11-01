@@ -5,10 +5,11 @@ use std::path::Path;
 use ansi_term::Colour::{Blue, Green, Red};
 use clap::{crate_version, App, Arg};
 use csv::{ReaderBuilder, Trim};
-use image::{open, GenericImageView, Rgba};
+use image::{open, DynamicImage, GenericImageView, Rgba};
 use imageproc::drawing::draw_hollow_rect_mut;
 use imageproc::rect::Rect;
 
+type Header = (String, u32, u32, u32, u32);
 type Row = (String, i32, i32, i32, i32);
 
 fn main() {
@@ -18,13 +19,17 @@ fn main() {
 		.author("JustAPenguin")
 		.about("CLI app that draws the hit, hurt, and collision boxes for Touhou 15.5 Antinomy of Common Flowers")
 		.arg(Arg::with_name("verbose")
+			.help("Prints out what the program is doing")
 			.short("v")
-			.long("verbose")
-			.help("Prints out more to aid in debugging"))
+			.long("verbose"))
 		.arg(Arg::with_name("csv_file")
 			.help("location to the csv file [REQUIRED]")
 			.index(1)
-		.required(true))
+			.required(true))
+		.arg(Arg::with_name("gif")
+			.help("will create a gif out of images *soon*")
+			.short("g")
+			.long("gif"))
 		.get_matches();
 
 	/* CREATE AN OUTPUT DIR IF NONE EXIST ALREADY */
@@ -56,129 +61,149 @@ fn main() {
 			);
 			std::process::exit(101);
 		});
-	let records =
-		rdr.deserialize().collect::<Result<Vec<Row>, csv::Error>>().unwrap_or_else(|_| {
+
+	// header stuff
+	let image_dir: String;
+	let padding_top: u32;
+	let padding_left: u32;
+	let padding_bottom: u32;
+	let padding_right: u32;
+
+	{
+		// headers is put in it own scope because rdr is used agin later on
+		let headers = rdr.headers().unwrap();
+		// deserialise the header, first line
+		let header: Header = headers.deserialize(None).unwrap_or_else(|_| {
 			println!(
 				"{}",
 				Red.bold().paint(
-					"error:\terror deserializing the csv file
-\tdid you not include the data correctly? there should
-\tonly be 5 columbs in the file and no numbers with decimals."
+					"error:\trow 1 formatted incorrectly
+\tshould be the path to the image folder followed by 4 positive whole numbers"
 				)
 			);
 			std::process::exit(65);
 		});
+		image_dir = header.0;
+		padding_top = header.1;
+		padding_left = header.2;
+		padding_bottom = header.3;
+		padding_right = header.4;
+		if matches.is_present("verbose") {
+			println!("succesfully read the header");
+		}
+	} // headers is dropped allowing the use of rdr later on
 
-	/* GET THE DATA FROM THE HEADER */
-	let header = rdr.headers().unwrap();
-	let path_to_image: String = header[0].parse().unwrap();
-	// FIXME: errors with a panic if data is missing
-	let padding_top: u32 = header[1].parse().unwrap_or_else(|_| {
-		println!(
-			"{}",
-			Red.bold()
-				.paint("error:\tthe top padding in the header of the csv file is not a number")
-		);
-		std::process::exit(65);
-	});
-	let padding_left: u32 = header[2].parse().unwrap_or_else(|_| {
-		println!(
-			"{}",
-			Red.bold()
-				.paint("error:\tthe left padding in the header of the csv file is not a number")
-		);
-		std::process::exit(65);
-	});
-	let padding_bottom: u32 = header[3].parse().unwrap_or_else(|_| {
-		println!(
-			"{}",
-			Red.bold()
-				.paint("error:\tthe bottom padding in the header of the csv file is not a number")
-		);
-		std::process::exit(65);
-	});
-	let padding_right: u32 = header[4].parse().unwrap_or_else(|_| {
-		println!(
-			"{}",
-			Red.bold()
-				.paint("error:\tthe right padding in the header of the csv file is not a number")
-		);
-		std::process::exit(65);
-	});
+	// image stuff
+	let mut sprite_name: String;
+	let mut x_crop: i32;
+	let mut y_crop: i32;
+	let mut matrix30: i32;
+	let mut matrix31: i32;
+	let img_width: u32;
+	let img_height: u32;
+	let mut img: DynamicImage;
 
-	/* FIRST IMAGE */
-	let mut sprite_name: &String = &records[0].0;
-	let mut x_crop: i32 = records[0].1;
-	let mut y_crop: i32 = records[0].2;
-	let mut matrix30: i32 = records[0].3;
-	let mut matrix31: i32 = records[0].4;
+	// deserialise first row, second line
+	let row: Row = rdr.records().next().unwrap().unwrap().deserialize(None).unwrap_or_else(|_| {
+		println!(
+			"{}",
+			Red.bold().paint(
+				"error:\trow 2 formatted incorrectly
+\tshould be the full image name followed by 4 positive whole numbers"
+			)
+		);
+		std::process::exit(65);
+	});
+	sprite_name = row.0;
+	x_crop = row.1;
+	y_crop = row.2;
+	matrix30 = row.3;
+	matrix31 = row.4;
 
 	if matches.is_present("verbose") {
-		println!("opening {}{}", path_to_image, Blue.paint(sprite_name));
+		println!("opening {}{}", image_dir, Blue.paint(&sprite_name));
 	}
-	let mut sprite: image::DynamicImage = open(format!("{}{}", path_to_image, sprite_name))
-		.unwrap_or_else(|_| {
+	let sprite: image::DynamicImage =
+		open(format!("{}{}", image_dir, sprite_name)).unwrap_or_else(|_| {
 			println!(
 				"{}",
 				Red.bold().paint("error:\tcould not open the first image in the csv file")
 			);
 			std::process::exit(65);
 		});
-	let img_width = sprite.width() + padding_left + padding_right;
-	let img_height = sprite.height() + padding_top + padding_bottom;
-	let mut img = image::DynamicImage::new_rgba8(img_width, img_height);
+	img_width = sprite.width() + padding_left + padding_right;
+	img_height = sprite.height() + padding_top + padding_bottom;
+	img = image::DynamicImage::new_rgba8(img_width, img_height);
 	image::imageops::overlay(&mut img, &sprite, padding_left, padding_top);
 	if matches.is_present("verbose") {
-		println!("opened {}{}", path_to_image, Blue.paint(sprite_name));
+		println!("opened {}{}", image_dir, Blue.paint(&sprite_name));
 	}
 
-	for (i, row) in records.iter().enumerate() {
-		match row.0.as_str() {
-			"coll" | "collision" => {
-				draw_hollow_rect_mut(
-					&mut img,
-					Rect::at(
-						x_crop - matrix30 - row.1 as i32 + row.3 + 1 + padding_left as i32,
-						y_crop - matrix31 - row.2 as i32 + row.4 + padding_top as i32,
-					)
-					.of_size((row.1 * 2) as u32, (row.2 * 2 + 1) as u32),
-					Rgba([0u8, 0u8, 255u8, 255u8]),
+	let mut line_num = 2; // the first 2 lines where already done (header and first image)
+	while let Some(result) = rdr.records().next() {
+		let record = result.unwrap();
+		line_num += 1; // increment line number by 1 for the error messages
+
+		if &record[0] == "GIF" && matches.is_present("gif") {
+			println!("creating gifs is not yet available")
+		// TODO: add gifs
+		} else {
+			let row: Row = record.deserialize(None).unwrap_or_else(|_| {
+				println!(
+					"{}",
+					Red.bold().paint(format!(
+						"error:\trow {} formatted incorrectly
+\tshould be either the image name or type of box followed by 4 positive numbers",
+						line_num
+					))
 				);
-				if matches.is_present("verbose") {
-					println!("drew collision box on {}", Blue.paint(sprite_name));
+				std::process::exit(65);
+			});
+			match row.0.as_str() {
+				"coll" | "collision" => {
+					draw_hollow_rect_mut(
+						&mut img,
+						Rect::at(
+							x_crop - matrix30 - row.1 as i32 + row.3 + 1 + padding_left as i32,
+							y_crop - matrix31 - row.2 as i32 + row.4 + padding_top as i32,
+						)
+						.of_size((row.1 * 2) as u32, (row.2 * 2 + 1) as u32),
+						Rgba([0u8, 0u8, 255u8, 255u8]),
+					);
+					if matches.is_present("verbose") {
+						println!("drew collision box on {}", Blue.paint(&sprite_name));
+					}
 				}
-			}
-			"hurt" => {
-				draw_hollow_rect_mut(
-					&mut img,
-					Rect::at(
-						x_crop - matrix30 - row.1 as i32 + row.3 + 1 + padding_left as i32,
-						y_crop - matrix31 - row.2 as i32 + row.4 + padding_top as i32,
-					)
-					.of_size((row.1 * 2) as u32, (row.2 * 2 + 1) as u32),
-					Rgba([0u8, 255u8, 0u8, 255u8]),
-				);
-				if matches.is_present("verbose") {
-					println!("drew hurt box on {}", Blue.paint(sprite_name));
+				"hurt" => {
+					draw_hollow_rect_mut(
+						&mut img,
+						Rect::at(
+							x_crop - matrix30 - row.1 as i32 + row.3 + 1 + padding_left as i32,
+							y_crop - matrix31 - row.2 as i32 + row.4 + padding_top as i32,
+						)
+						.of_size((row.1 * 2) as u32, (row.2 * 2 + 1) as u32),
+						Rgba([0u8, 255u8, 0u8, 255u8]),
+					);
+					if matches.is_present("verbose") {
+						println!("drew hurt box on {}", Blue.paint(&sprite_name));
+					}
 				}
-			}
-			"hit" => {
-				draw_hollow_rect_mut(
-					&mut img,
-					Rect::at(
-						x_crop - matrix30 - row.1 as i32 + row.3 + 1 + padding_left as i32,
-						y_crop - matrix31 - row.2 as i32 + row.4 + padding_top as i32,
-					)
-					.of_size((row.1 * 2) as u32, (row.2 * 2 + 1) as u32),
-					Rgba([255u8, 0u8, 0u8, 255u8]),
-				);
-				if matches.is_present("verbose") {
-					println!("drew hit box on {}", Blue.paint(sprite_name));
+				"hit" => {
+					draw_hollow_rect_mut(
+						&mut img,
+						Rect::at(
+							x_crop - matrix30 - row.1 as i32 + row.3 + 1 + padding_left as i32,
+							y_crop - matrix31 - row.2 as i32 + row.4 + padding_top as i32,
+						)
+						.of_size((row.1 * 2) as u32, (row.2 * 2 + 1) as u32),
+						Rgba([255u8, 0u8, 0u8, 255u8]),
+					);
+					if matches.is_present("verbose") {
+						println!("drew hit box on {}", Blue.paint(&sprite_name));
+					}
 				}
-			}
-			_ => {
-				/* SPRITE / IMAGE */
-				if i != 0 {
+				_ => {
+					/* SPRITE / IMAGE */
 					img.save(format!("output/{}", sprite_name)).unwrap_or_else(|_| {
 						println!(
 							"{}",
@@ -188,25 +213,23 @@ fn main() {
 						std::process::exit(101);
 					});
 					if matches.is_present("verbose") {
-						println!("saved image {} to output dir", Blue.paint(sprite_name));
+						println!("saved image {} to output dir", Blue.paint(&sprite_name));
 					}
-
-					sprite_name = &row.0;
+					sprite_name = row.0;
 					x_crop = row.1;
 					y_crop = row.2;
 					matrix30 = row.3;
 					matrix31 = row.4;
-
 					if matches.is_present("verbose") {
-						println!("opening {}{}", path_to_image, Blue.paint(sprite_name));
+						println!("opening {}{}", image_dir, Blue.paint(&sprite_name));
 					}
-					sprite =
-						open(format!("{}{}", path_to_image, sprite_name)).unwrap_or_else(|_| {
+					let sprite =
+						open(format!("{}{}", image_dir, sprite_name)).unwrap_or_else(|_| {
 							println!(
 								"{}",
 								Red.bold().paint(format!(
 									"error:\tcould not open the image on line {}",
-									i + 2
+									line_num
 								))
 							);
 							std::process::exit(65);
@@ -214,11 +237,11 @@ fn main() {
 					img = image::DynamicImage::new_rgba8(img_width, img_height);
 					image::imageops::overlay(&mut img, &sprite, padding_left, padding_top);
 					if matches.is_present("verbose") {
-						println!("opened {}{}", path_to_image, Blue.paint(sprite_name));
+						println!("opened {}{}", image_dir, Blue.paint(&sprite_name));
 					}
 				}
 			}
-		};
+		}
 	}
 	img.save(format!("output/{}", sprite_name)).unwrap_or_else(|_| {
 		println!(
@@ -228,7 +251,7 @@ fn main() {
 		std::process::exit(101);
 	});
 	if matches.is_present("verbose") {
-		println!("saved image {} to output dir", Blue.paint(sprite_name));
+		println!("saved image {} to output dir", Blue.paint(&sprite_name));
 	}
 
 	println!("{}", Green.bold().paint("done!"))
