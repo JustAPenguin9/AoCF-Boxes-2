@@ -1,16 +1,18 @@
 use std::env;
-use std::fs::create_dir;
+use std::fs::{File, create_dir};
 use std::path::Path;
 
 use ansi_term::Colour::{Blue, Green, Red};
 use clap::{crate_version, App, Arg};
 use csv::{ReaderBuilder, Trim};
-use image::{open, DynamicImage, GenericImageView, Rgba};
+use image::gif::{GifEncoder, Repeat};
+use image::{DynamicImage, Frame, GenericImageView, Rgba, open};
 use imageproc::drawing::draw_hollow_rect_mut;
 use imageproc::rect::Rect;
 
 type Header = (String, u32, u32, u32, u32);
 type Row = (String, i32, i32, i32, i32);
+type Gif = (String, String, u32);
 
 fn main() {
 	/* CLAP */
@@ -101,7 +103,10 @@ fn main() {
 	let mut matrix31: i32;
 	let img_width: u32;
 	let img_height: u32;
-	let mut img: DynamicImage;
+	let mut img;//: DynamicImage;
+
+	let mut gif_name: String = "supercoolmove".to_string();
+	let mut frames: Vec<Frame> = vec![]; // frames for the gif
 
 	// deserialise first row, second line
 	let row: Row = rdr.records().next().unwrap().unwrap().deserialize(None).unwrap_or_else(|_| {
@@ -133,27 +138,63 @@ fn main() {
 		});
 	img_width = sprite.width() + padding_left + padding_right;
 	img_height = sprite.height() + padding_top + padding_bottom;
-	img = image::DynamicImage::new_rgba8(img_width, img_height);
+	img = image::ImageBuffer::from_fn(img_width, img_height, |_x, _y| {
+		if matches.is_present("gif") {
+			image::Rgba([37, 31, 38, 255]) // set the bg to a solid colour
+		} else {
+			image::Rgba([0, 0, 0, 0]) // make the bg transparent
+		}
+	});
 	image::imageops::overlay(&mut img, &sprite, padding_left, padding_top);
 	if matches.is_present("verbose") {
 		println!("opened {}{}", image_dir, Blue.paint(&sprite_name));
 	}
 
+	/* START OF THE MAIN LOOP */
 	let mut line_num = 2; // the first 2 lines where already done (header and first image)
 	while let Some(result) = rdr.records().next() {
-		let record = result.unwrap();
+		let record = &result.unwrap().clone();
 		line_num += 1; // increment line number by 1 for the error messages
 
-		if &record[0] == "GIF" && matches.is_present("gif") {
-			println!("creating gifs is not yet available")
-		// TODO: add gifs
+		if &record[0] == "GIF" {
+			if matches.is_present("gif") {
+				gif_name = record[1].to_string().clone();
+
+					
+				let row: Gif = record.deserialize(None).unwrap_or_else(|_| {
+					println!(
+						"{}",
+						Red.bold().paint(format!(
+							"error:\trow {} formatted incorrectly
+\tshould be the name of an image followed its exposre starting at 1",
+							line_num
+						))
+					);
+					std::process::exit(65);
+				});
+				println!("{:?}", row);
+
+				for _ in 0..row.2 {
+					frames.push(Frame::new(open(format!("output/{}.png", row.1)).unwrap_or_else(|_| {
+						println!("img does not exist");std::process::exit(65);
+					}).into_rgba8()));
+					println!("pushing {:?}", row.1)
+				}
+
+				line_num += 1; // increment line number by 1 for the error messages
+				// line num is incremented at the end instead of the begining because 
+				// the line number is already incrememted from the previous while loop
+			} else {
+				println!("breaking");
+				break // break if gif is found but the flag is not used.
+			};
 		} else {
 			let row: Row = record.deserialize(None).unwrap_or_else(|_| {
 				println!(
 					"{}",
 					Red.bold().paint(format!(
 						"error:\trow {} formatted incorrectly
-\tshould be either the image name or type of box followed by 4 positive numbers",
+\tshould be the image name or type of box followed by 4 positive numbers",
 						line_num
 					))
 				);
@@ -234,7 +275,13 @@ fn main() {
 							);
 							std::process::exit(65);
 						});
-					img = image::DynamicImage::new_rgba8(img_width, img_height);
+					img = image::ImageBuffer::from_fn(img_width, img_height, |_x, _y| {
+						if matches.is_present("gif") {
+							image::Rgba([37, 31, 38, 255]) // set the bg to a solid colour
+						} else {
+							image::Rgba([0, 0, 0, 0]) // make the bg transparent
+						}
+					});
 					image::imageops::overlay(&mut img, &sprite, padding_left, padding_top);
 					if matches.is_present("verbose") {
 						println!("opened {}{}", image_dir, Blue.paint(&sprite_name));
@@ -243,6 +290,7 @@ fn main() {
 			}
 		}
 	}
+	// save the image
 	img.save(format!("output/{}", sprite_name)).unwrap_or_else(|_| {
 		println!(
 			"{}",
@@ -252,6 +300,13 @@ fn main() {
 	});
 	if matches.is_present("verbose") {
 		println!("saved image {} to output dir", Blue.paint(&sprite_name));
+	}
+
+	// save the gif
+	if matches.is_present("gif") {
+		let mut encoder = GifEncoder::new_with_speed(File::create(format!("output/{}.gif", gif_name)).unwrap(), 1);
+		encoder.set_repeat(Repeat::Infinite).unwrap();
+		encoder.encode_frames(frames).unwrap();
 	}
 
 	println!("{}", Green.bold().paint("done!"))
