@@ -16,7 +16,7 @@ mod row_types;
 use row_types::{BoxRow, HeaderRow, ImageRow};
 
 fn main() {
-	/* CLAP */
+	// clap
 	let app = App::new("AoCF Boxes 2")
 		.version(format!("v{}", crate_version!()).as_str())
 		.author("JustAPenguin")
@@ -30,6 +30,10 @@ fn main() {
 			.help("location to the csv file [REQUIRED]")
 			.index(1)
 			.required(true))
+		.arg(Arg::with_name("no_sprites")
+			.help("Draw the boxes without the sprite")
+			.short("n")
+			.long("noSprites"))
 		.arg(Arg::with_name("output_dir")
 			.help("Set the output directory. Default ./output/")
 			.short("o")
@@ -37,7 +41,7 @@ fn main() {
 			.takes_value(true))
 		.get_matches();
 
-	/* CREATE AN OUTPUT DIR IF NONE EXIST ALREADY */
+	// create an output dir if none exist
 	let output_dir = app.value_of("output_dir").unwrap_or("output");
 	if !Path::new(output_dir).is_dir() {
 		create_dir(output_dir).unwrap_or_else(|_| {
@@ -111,7 +115,7 @@ fn main() {
 			println!("{:#?}", &image_row)
 		}
 	}
-	let mut img = create_image(&header, &image_row).unwrap_or_else(|_| {
+	let mut img = create_image(&header, &image_row, &app).unwrap_or_else(|_| {
 		println!(
 			"{}",
 			Red.bold().paint(format!(
@@ -258,33 +262,30 @@ fn main() {
 					}
 				}
 			}
-			"gif" | "frame" => {
-				// TODO:
-				println!("gifs are not supported in this release")
-			}
 			_ => {
 				// save the image
 				img_num += 1;
-				img.save(format!(
+				let img_name = format!(
 					"{}/{}-boxes{:02}.png",
 					output_dir,
-					&image_row.sprite_name[..&image_row.sprite_name.len() - 4],
+					&app.value_of("csv_file").unwrap(),
 					img_num
-				))
+				);
+				img.save(&img_name)
 				.unwrap_or_else(|_| {
 					println!(
 						"{}",
 						Red.bold().paint(format!(
 							"error:\tcould not save the image {}",
-							&image_row.sprite_name
+							&img_name
 						))
 					);
 					std::process::exit(101);
 				});
 				if app.is_present("verbose") {
 					println!(
-						"saved image {} to the output dir",
-						Blue.paint(&image_row.sprite_name)
+						"saved image {}",
+						Blue.paint(&img_name)
 					);
 				}
 
@@ -315,7 +316,7 @@ fn main() {
 						println!("{:#?}", &image_row)
 					}
 				}
-				img = create_image(&header, &image_row).unwrap_or_else(|_| {
+				img = create_image(&header, &image_row, &app).unwrap_or_else(|_| {
 					println!(
 						"{}",
 						Red.bold().paint(format!(
@@ -334,22 +335,28 @@ fn main() {
 
 	// save the final image
 	img_num += 1;
-	img.save(format!(
+	let img_name = format!(
 		"{}/{}-boxes{:02}.png",
 		output_dir,
-		&image_row.sprite_name[..&image_row.sprite_name.len() - 4],
+		&app.value_of("csv_file").unwrap(),
 		img_num
-	))
+	);
+	img.save(&img_name)
 	.unwrap_or_else(|_| {
 		println!(
 			"{}",
-			Red.bold()
-				.paint(format!("error:\tcould not save the image {}", &image_row.sprite_name))
+			Red.bold().paint(format!(
+				"error:\tcould not save the image {}",
+				&img_name
+			))
 		);
 		std::process::exit(101);
 	});
 	if app.is_present("verbose") {
-		println!("saved image {} to the output dir", Blue.paint(&image_row.sprite_name));
+		println!(
+			"saved image {}",
+			Blue.paint(&img_name)
+		);
 	}
 
 	println!("{}", Green.bold().paint("done!"))
