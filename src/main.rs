@@ -16,6 +16,10 @@ mod row_types;
 use row_types::{BoxRow, HeaderRow, ImageRow};
 
 fn main() {
+	// enable coloured output on windows
+	#[cfg(target_os="windows")]
+	ansi_term::enable_ansi_support();
+
 	// clap
 	let app = App::new("AoCF Boxes 2")
 		.version(format!("v{}", crate_version!()).as_str())
