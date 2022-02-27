@@ -1,7 +1,5 @@
-#!/bin/bash
-# Builds the linux and windows releases and moves the files into the output folder
-
-cargo fmt
+#!/bin/sh
+# Builds the linux and windows releases
 
 cargo build --release --target x86_64-unknown-linux-gnu
 cargo build --release --target x86_64-pc-windows-gnu

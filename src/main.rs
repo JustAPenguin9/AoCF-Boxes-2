@@ -3,7 +3,7 @@ use std::fs::create_dir;
 use std::path::Path;
 
 use ansi_term::Colour::{Blue, Green, Red};
-use clap::{crate_version, App, Arg};
+use clap::{crate_version, Arg, Command};
 use csv::{ReaderBuilder, Trim};
 use image::Rgba;
 use imageproc::drawing::draw_hollow_rect_mut;
@@ -17,42 +17,42 @@ use row_types::{BoxRow, HeaderRow, ImageRow};
 
 fn main() {
 	// enable coloured output on windows
-	#[cfg(target_os="windows")]
+	#[cfg(target_os = "windows")]
 	ansi_term::enable_ansi_support();
 
 	// clap
-	let app = App::new("AoCF Boxes 2")
-		.version(format!("v{}", crate_version!()).as_str())
+	let matches = Command::new("AoCF Boxes 2")
+		.version(crate_version!())
 		.author("JustAPenguin")
 		.about("CLI app that draws the hit, hurt, and collision boxes for Touhou 15.5 Antinomy of Common Flowers")
-		.arg(Arg::with_name("verbose")
+		.arg(Arg::new("verbose")
 			.help("Prints out the verbose output (-vv for extra verbosity)")
-			.short("v")
+			.short('v')
 			.long("verbose")
-			.multiple(true))
-		.arg(Arg::with_name("csv_file")
+			.multiple_occurrences(true))
+		.arg(Arg::new("csv_file")
 			.help("location to the csv file [REQUIRED]")
 			.index(1)
 			.required(true))
-		.arg(Arg::with_name("no_sprites")
+		.arg(Arg::new("no_sprites")
 			.help("Draw the boxes without the sprite")
-			.short("n")
+			.short('n')
 			.long("noSprites"))
-		.arg(Arg::with_name("output_dir")
+		.arg(Arg::new("output_dir")
 			.help("Set the output directory. Default ./output/")
-			.short("o")
+			.short('o')
 			.long("outputDir")
 			.takes_value(true))
 		.get_matches();
 
 	// create an output dir if none exist
-	let output_dir = app.value_of("output_dir").unwrap_or("output");
+	let output_dir = matches.value_of("output_dir").unwrap_or("output");
 	if !Path::new(output_dir).is_dir() {
 		create_dir(output_dir).unwrap_or_else(|_| {
 			println!("{}", Red.bold().paint("error:\tcould not create the output directory"));
 			std::process::exit(101);
 		});
-		if app.is_present("verbose") {
+		if matches.is_present("verbose") {
 			println!("output dir {} created", Blue.paint(output_dir));
 		}
 	}
@@ -63,7 +63,7 @@ fn main() {
 		.flexible(true)
 		.comment(Some(b'#'))
 		.trim(Trim::All)
-		.from_path(app.value_of("csv_file").unwrap())
+		.from_path(matches.value_of("csv_file").unwrap())
 		.unwrap_or_else(|_| {
 			println!(
 				"{}",
@@ -90,7 +90,7 @@ fn main() {
 			);
 			std::process::exit(65);
 		});
-	match app.occurrences_of("verbose") {
+	match matches.occurrences_of("verbose") {
 		0 => (),
 		1 => println!("succesfully read the header"),
 		2 | _ => {
@@ -111,7 +111,7 @@ fn main() {
 			);
 			std::process::exit(65);
 		});
-	match app.occurrences_of("verbose") {
+	match matches.occurrences_of("verbose") {
 		0 => (),
 		1 => println!("opening {}{}", &header.image_dir, Blue.paint(&image_row.sprite_name)),
 		2 | _ => {
@@ -119,7 +119,7 @@ fn main() {
 			println!("{:#?}", &image_row)
 		}
 	}
-	let mut img = create_image(&header, &image_row, &app).unwrap_or_else(|_| {
+	let mut img = create_image(&header, &image_row, &matches).unwrap_or_else(|_| {
 		println!(
 			"{}",
 			Red.bold().paint(format!(
@@ -129,7 +129,7 @@ fn main() {
 		);
 		std::process::exit(65);
 	});
-	if app.is_present("verbose") {
+	if matches.is_present("verbose") {
 		println!("opened {}{}", &header.image_dir, Blue.paint(&image_row.sprite_name))
 	}
 
@@ -161,7 +161,7 @@ fn main() {
 					.of_size((row.width * 2) as u32, (row.height * 2 + 1) as u32),
 					Rgba([0u8, 0u8, 255u8, 255u8]), // blue
 				);
-				match app.occurrences_of("verbose") {
+				match matches.occurrences_of("verbose") {
 					0 => (),
 					1 => println!("drew collision box on {}", Blue.paint(&image_row.sprite_name)),
 					2 | _ => {
@@ -193,7 +193,7 @@ fn main() {
 					.of_size((row.width * 2) as u32, (row.height * 2 + 1) as u32),
 					Rgba([0u8, 255u8, 0u8, 255u8]), // green
 				);
-				match app.occurrences_of("verbose") {
+				match matches.occurrences_of("verbose") {
 					0 => (),
 					1 => println!("drew hurt box on {}", Blue.paint(&image_row.sprite_name)),
 					2 | _ => {
@@ -225,7 +225,7 @@ fn main() {
 					.of_size((row.width * 2) as u32, (row.height * 2 + 1) as u32),
 					Rgba([255u8, 0u8, 0u8, 255u8]), // red
 				);
-				match app.occurrences_of("verbose") {
+				match matches.occurrences_of("verbose") {
 					0 => (),
 					1 => println!("drew hit box on {}", Blue.paint(&image_row.sprite_name)),
 					2 | _ => {
@@ -257,7 +257,7 @@ fn main() {
 					.of_size((row.width * 2) as u32, (row.height * 2 + 1) as u32),
 					Rgba([255u8, 255u8, 0u8, 255u8]), // yellow
 				);
-				match app.occurrences_of("verbose") {
+				match matches.occurrences_of("verbose") {
 					0 => (),
 					1 => println!("drew hit box on {}", Blue.paint(&image_row.sprite_name)),
 					2 | _ => {
@@ -272,25 +272,18 @@ fn main() {
 				let img_name = format!(
 					"{}/{}-boxes{:02}.png",
 					output_dir,
-					&app.value_of("csv_file").unwrap(),
+					&matches.value_of("csv_file").unwrap(),
 					img_num
 				);
-				img.save(&img_name)
-				.unwrap_or_else(|_| {
+				img.save(&img_name).unwrap_or_else(|_| {
 					println!(
 						"{}",
-						Red.bold().paint(format!(
-							"error:\tcould not save the image {}",
-							&img_name
-						))
+						Red.bold().paint(format!("error:\tcould not save the image {}", &img_name))
 					);
 					std::process::exit(101);
 				});
-				if app.is_present("verbose") {
-					println!(
-						"saved image {}",
-						Blue.paint(&img_name)
-					);
+				if matches.is_present("verbose") {
+					println!("saved image {}", Blue.paint(&img_name));
 				}
 
 				image_row = record.deserialize(None).unwrap_or_else(|_| {
@@ -304,7 +297,7 @@ fn main() {
 					);
 					std::process::exit(65);
 				});
-				match app.occurrences_of("verbose") {
+				match matches.occurrences_of("verbose") {
 					0 => (),
 					1 => println!(
 						"opening {}{}",
@@ -320,7 +313,7 @@ fn main() {
 						println!("{:#?}", &image_row)
 					}
 				}
-				img = create_image(&header, &image_row, &app).unwrap_or_else(|_| {
+				img = create_image(&header, &image_row, &matches).unwrap_or_else(|_| {
 					println!(
 						"{}",
 						Red.bold().paint(format!(
@@ -330,7 +323,7 @@ fn main() {
 					);
 					std::process::exit(65);
 				});
-				if app.is_present("verbose") {
+				if matches.is_present("verbose") {
 					println!("opened {}{}", &header.image_dir, Blue.paint(&image_row.sprite_name))
 				}
 			}
@@ -342,25 +335,15 @@ fn main() {
 	let img_name = format!(
 		"{}/{}-boxes{:02}.png",
 		output_dir,
-		&app.value_of("csv_file").unwrap(),
+		&matches.value_of("csv_file").unwrap(),
 		img_num
 	);
-	img.save(&img_name)
-	.unwrap_or_else(|_| {
-		println!(
-			"{}",
-			Red.bold().paint(format!(
-				"error:\tcould not save the image {}",
-				&img_name
-			))
-		);
+	img.save(&img_name).unwrap_or_else(|_| {
+		println!("{}", Red.bold().paint(format!("error:\tcould not save the image {}", &img_name)));
 		std::process::exit(101);
 	});
-	if app.is_present("verbose") {
-		println!(
-			"saved image {}",
-			Blue.paint(&img_name)
-		);
+	if matches.is_present("verbose") {
+		println!("saved image {}", Blue.paint(&img_name));
 	}
 
 	println!("{}", Green.bold().paint("done!"))

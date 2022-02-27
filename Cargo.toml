@@ -7,8 +7,8 @@ edition = "2018"
 
 [dependencies]
 ansi_term = "0.12.1"
-clap = "2.33.3"
+clap = { version = "3.1.2", features = ["cargo"] }
 csv = "1.1.6"
 image = "0.23.14"
 imageproc = "0.22.0"
-serde = { version = "1.0.130", features = ["derive"] }
+serde = { version = "1.0.136", features = ["derive"] }
