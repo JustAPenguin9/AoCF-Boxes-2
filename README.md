@@ -6,23 +6,71 @@ AoCF boxes 2 draws the hit, hurt and collision boxes for *Touhou Hyouibana ~ Ant
 To use AoCF boxes 2 download the most most recient [release](https://github.com/JustAPenguin9/AoCF-Boxes-2/releases) on to your computer.
 To run AoCF boxes 2 type into your terminal:
 ```shell
-aocf-boxes-2 [path to your .csv file]
+aocf-boxes-2 [path to your .ron file]
 ```
 
-### Current format for the .csv file
-```
-path to image folder (including the "/" at the end), padding top, padding left, padding bottom, padding right 
-image, x crop, y crop, matrix30, matrix31
-[coll OR hurt OR hit], width,  height, x offset, y offset
-image, x crop, y crop, matrix30, matrix31
-[coll OR hurt OR hit], width,  height, x offset, y offset
-cont...
-```
+### Current format for the .ron file
+- Trailing commas are allowed
+- Comments can be done with `//` and `/*` `*/`
 
-#### Available flags
-The available flags when running are...<br>
--h, --help: Prints help information<br>
--V, --version: Prints version information<br>
--v, --verbose: Prints out more to aid in debugging<br>
-
-###### i swear its actually good this time
+(This isn't the real numbers for Reimu j5a)
+```rs
+(
+	// directory where all the sprites are stored
+	directory: "reimu/",
+	// name given to the images outputted
+	name: "reimu-j5a",
+	// (top, left, bottom, right)
+	padding_tlbr: (10, 0, 0, 20),
+	// list of the frames
+	images: [
+		(
+			// sprite in the directory named above
+			file: "frame1.png",
+			// (x, y)
+			crop_xy: (0, 10),
+			matrix30: 10,
+			matrix31: 20,
+			// list of the boxes to draw on the sprite
+			boxes: [
+				(
+					// the colour can be "Hit", "Hit2", "Hurt", or "Collision"
+					colour: Collision,
+					// (width, height)
+					size_wh: (15, 15),
+					// (x, y)
+					offset_xy: (30, 30),
+				),
+				(
+					colour: Hurt,
+					size_wh: (30, 30),
+					offset_xy: (50, 50),
+				),
+			]
+		),
+		(
+			file: "frame2.png",
+			crop_xy: (0, 10),
+			matrix30: 20,
+			matrix31: 15,
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (15, 15),
+					offset_xy: (40, 30),
+				),
+				(
+					colour: Hurt,
+					size_wh: (30, 30),
+					offset_xy: (60, 50),
+				),
+				(
+					colour: Hit2,
+					size_wh: (50, 60),
+					offset_xy: (55, 20)
+				)
+			]
+		)
+	]
+)
+```
