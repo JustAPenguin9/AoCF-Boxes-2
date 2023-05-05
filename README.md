@@ -1,6 +1,6 @@
 # AoCF-Boxes-2
 
-AoCF boxes 2 draws the hit, hurt and collision boxes for *Touhou Hyouibana ~ Antinomy of Common Flowers* through the use of a .csv file. AoCF boxes 2 is meant to be a replacement to the original [AoCF boxes](https://github.com/JustAPenguin9/AoCF-Boxes). Boxes 2 does everything that boxes 1 does in a quicker and cleaner fashion.
+AoCF boxes 2 draws the hit, hurt and collision boxes for *Touhou Hyouibana ~ Antinomy of Common Flowers* through the use of a .ron file. AoCF boxes 2 is meant to be a replacement to the original [AoCF boxes](https://github.com/JustAPenguin9/AoCF-Boxes). Boxes 2 does everything that boxes 1 does in a quicker and cleaner fashion.
 
 ### Downloading and running
 To use AoCF boxes 2 download the most most recient [release](https://github.com/JustAPenguin9/AoCF-Boxes-2/releases) on to your computer.
@@ -15,6 +15,9 @@ aocf-boxes-2 [path to your .ron file]
 
 (This isn't the real numbers for Reimu j5a)
 ```rs
+// this is only needed if you don't want to wrap every optional field in "Some(#)"
+#![enable(implicit_some)]
+
 (
 	// directory where all the sprites are stored
 	directory: "reimu/",
@@ -27,6 +30,8 @@ aocf-boxes-2 [path to your .ron file]
 		(
 			// sprite in the directory named above
 			file: "frame1.png",
+			// the exposure of an image when encoded as a gif (optional)
+			exposure: 3,
 			// (x, y)
 			crop_xy: (0, 10),
 			matrix30: 10,
@@ -34,7 +39,7 @@ aocf-boxes-2 [path to your .ron file]
 			// list of the boxes to draw on the sprite
 			boxes: [
 				(
-					// the colour can be "Hit", "Hit2", "Hurt", or "Collision"
+					// the colour can be "Hit", "Hit2", "Hurt", "Collision", or a custom value with "Hex(0xFF6A10)"
 					colour: Collision,
 					// (width, height)
 					size_wh: (15, 15),
@@ -50,6 +55,7 @@ aocf-boxes-2 [path to your .ron file]
 		),
 		(
 			file: "frame2.png",
+			exposure: 9,
 			crop_xy: (0, 10),
 			matrix30: 20,
 			matrix31: 15,
