@@ -25,7 +25,7 @@ fn main() {
 	let file: Move = match ron::de::from_reader(f) {
 		Ok(x) => x,
 		Err(e) => {
-			println!("Failed to load {:?} {}", path, e);
+			println!("Failed to load {path:?} {e}");
 
 			std::process::exit(1);
 		}
@@ -37,6 +37,9 @@ fn main() {
 		std::fs::create_dir(output_dir)
 			.unwrap_or_else(|_| error_out("Could not create the output directory"))
 	}
+
+	let mut frames: Vec<image::Frame> = vec![];
+	let mut can_make_gif = true;
 
 	let mut i = 0;
 	for image in file.images {
@@ -68,7 +71,7 @@ fn main() {
 					val = val << 8 | 0x000000FF;
 					let arr = val.to_be_bytes();
 					Rgba(arr)
-				},
+				}
 			};
 
 			imageproc::drawing::draw_hollow_rect_mut(
@@ -86,8 +89,35 @@ fn main() {
 		}
 
 		let name = format!("{}/{}-boxes{i:02}.png", output_dir, file.name);
-		base.save(&name)
-			.unwrap_or_else(|_| error_out(format!("Could not save the image {}", name)));
+		base.save(&name).unwrap_or_else(|_| error_out(format!("Could not save the image {name}")));
+
+		if image.exposure.is_none() {
+			can_make_gif = false
+		} else {
+			// will never error because the None case is checked above
+			for _ in 0..image.exposure.unwrap() {
+				frames.push(image::Frame::new(base.clone().into_rgba8()));
+			}
+		}
+
 		i += 1;
+	}
+
+	// save the gif if needed
+	match (matches.get_flag("gif"), can_make_gif) {
+		(true, true) => {
+			let path = std::fs::File::create(format!("{}/{}.gif", output_dir, file.name))
+				.unwrap_or_else(|_| error_out("Could not encode the gif"));
+			let mut encoder = image::codecs::gif::GifEncoder::new(path);
+			encoder
+				.set_repeat(image::codecs::gif::Repeat::Infinite)
+				.unwrap_or_else(|_| error_out("Could not encode the gif"));
+
+			encoder.encode_frames(frames).unwrap_or_else(|_| error_out("Could not encode the gif"));
+		}
+		(true, false) => {
+			println!("Could not make a gif because not all images had a valid exposure")
+		}
+		_ => (),
 	}
 }

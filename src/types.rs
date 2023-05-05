@@ -11,6 +11,7 @@ pub struct Move {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Image {
 	pub file: String,
+	pub exposure: Option<u32>,
 	pub crop_xy: (i32, i32),
 	pub matrix30: i32,
 	pub matrix31: i32,
