@@ -62,6 +62,13 @@ fn main() {
 				Colour::Hit2 => Rgba([255u8, 255u8, 0u8, 255u8]),
 				Colour::Hurt => Rgba([0u8, 255u8, 0u8, 255u8]),
 				Colour::Collision => Rgba([0u8, 0u8, 255u8, 255u8]),
+				Colour::Hex(mut val) => {
+					// left shift the value 8 bits because the input is only 24 bits for RGB missing the 8 alpha bits
+					// then OR the number with 0x000000FF so that its always completly visable
+					val = val << 8 | 0x000000FF;
+					let arr = val.to_be_bytes();
+					Rgba(arr)
+				},
 			};
 
 			imageproc::drawing::draw_hollow_rect_mut(

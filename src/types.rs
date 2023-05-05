@@ -39,5 +39,5 @@ pub enum Colour {
 	Hurt,
 	Collision,
 	// TODO: hex values
-	// Hex(u32),
+	Hex(u32),
 }
