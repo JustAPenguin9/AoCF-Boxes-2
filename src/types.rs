@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct Move {
 	pub directory: String,
 	pub name: String,
+	pub speed: Option<i32>,
 	pub padding_tlbr: (u32, u32, u32, u32),
 	pub images: Vec<Image>,
 }
@@ -13,8 +14,7 @@ pub struct Image {
 	pub file: String,
 	pub exposure: Option<u32>,
 	pub crop_xy: (i32, i32),
-	pub matrix30: i32,
-	pub matrix31: i32,
+    pub matrix_3031: (i32, i32),
 	// TODO: overlays
 	// overlays: Option<Vec<Overlay>>,
 	pub boxes: Vec<Box>,
@@ -39,6 +39,5 @@ pub enum Colour {
 	Hit2,
 	Hurt,
 	Collision,
-	// TODO: hex values
 	Hex(u32),
 }

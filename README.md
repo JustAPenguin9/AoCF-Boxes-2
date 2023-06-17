@@ -34,8 +34,8 @@ aocf-boxes-2 [path to your .ron file]
 			exposure: 3,
 			// (x, y)
 			crop_xy: (0, 10),
-			matrix30: 10,
-			matrix31: 20,
+			// (matrix30, matrix31)
+			matrix_3031: (10, 20),
 			// list of the boxes to draw on the sprite
 			boxes: [
 				(
@@ -57,8 +57,7 @@ aocf-boxes-2 [path to your .ron file]
 			file: "frame2.png",
 			exposure: 9,
 			crop_xy: (0, 10),
-			matrix30: 20,
-			matrix31: 15,
+			matrix_3031: (20, 15),
 			boxes: [
 				(
 					colour: Collision,

@@ -65,22 +65,18 @@ fn main() {
 				Colour::Hit2 => Rgba([255u8, 255u8, 0u8, 255u8]),
 				Colour::Hurt => Rgba([0u8, 255u8, 0u8, 255u8]),
 				Colour::Collision => Rgba([0u8, 0u8, 255u8, 255u8]),
-				Colour::Hex(mut val) => {
-					// left shift the value 8 bits because the input is only 24 bits for RGB missing the 8 alpha bits
-					// then OR the number with 0x000000FF so that its always completly visable
-					val = val << 8 | 0x000000FF;
-					let arr = val.to_be_bytes();
-					Rgba(arr)
-				}
+				// left shift the value 8 bits because the input is only 24 bits for RGB missing the 8 alpha bits
+				// then OR the number with 0x000000FF so that its always completly visable
+				Colour::Hex(val) => Rgba((val << 8 | 0x000000FF).to_be_bytes()),
 			};
 
 			imageproc::drawing::draw_hollow_rect_mut(
 				&mut base,
 				Rect::at(
-					image.crop_xy.0 - image.matrix30 - b.size_wh.0 as i32
+					image.crop_xy.0 - image.matrix_3031.0 - b.size_wh.0 as i32
 						+ b.offset_xy.0 + file.padding_tlbr.1 as i32
 						+ 1,
-					image.crop_xy.1 - image.matrix31 - b.size_wh.1 as i32
+					image.crop_xy.1 - image.matrix_3031.1 - b.size_wh.1 as i32
 						+ b.offset_xy.1 + file.padding_tlbr.0 as i32,
 				)
 				.of_size(b.size_wh.0 * 2, b.size_wh.1 * 2 + 1),
@@ -108,7 +104,7 @@ fn main() {
 		(true, true) => {
 			let path = std::fs::File::create(format!("{}/{}.gif", output_dir, file.name))
 				.unwrap_or_else(|_| error_out("Could not encode the gif"));
-			let mut encoder = image::codecs::gif::GifEncoder::new(path);
+			let mut encoder = image::codecs::gif::GifEncoder::new_with_speed(path, file.speed.unwrap_or_else(|| 1));
 			encoder
 				.set_repeat(image::codecs::gif::Repeat::Infinite)
 				.unwrap_or_else(|_| error_out("Could not encode the gif"));
