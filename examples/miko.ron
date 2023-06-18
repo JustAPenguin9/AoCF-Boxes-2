@@ -1,0 +1,665 @@
+
+/**********************************
+* example written by SonofGod1998
+**********************************/
+
+
+// this is only needed if you don't want to wrap every optional field in "Some(#)"
+#![enable(implicit_some)]
+
+(
+	// directory where all the sprites are stored
+	directory: "./",
+	// name given to the images outputted
+	name: "miko-f5a",
+	speed: 30,
+	// (top, left, bottom, right)
+	padding_tlbr: (0, 0, 0, 20),
+	// list of the frames
+	images: [
+	//Take 0, Startup: 11f
+		(
+			// sprite in the directory named above
+			file: "atkMid0000cape.png",
+			// the exposure of an image when encoded as a gif (optional)
+			exposure: 2,
+			// (x, y)
+			crop_xy: (80, 63),
+			matrix_3031: (-52, -86),
+			// list of the boxes to draw on the sprite
+			boxes: [
+				(
+					// the colour can be "Hit", "Hit2", "Hurt", "Collision", or a custom value with "Hex(0xFF6A10)"
+					colour: Collision,
+					// (width, height)
+					size_wh: (20, 55),
+					// (x, y)
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (20, 20),
+					offset_xy: (30, -51),
+				),
+				(
+					colour: Hurt,
+					size_wh: (27, 19),
+					offset_xy: (13, -24),
+				),
+				(
+					colour: Hurt,
+					size_wh: (25, 21),
+					offset_xy: (3, 4),
+				),
+				(
+					colour: Hurt,
+					size_wh: (18, 17),
+					offset_xy: (-1, 40),
+				)
+			]
+		),
+		(
+			file: "atkMid0001cape.png",
+			exposure: 2,
+			crop_xy: (81, 72),
+			matrix_3031: (-51, -77),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (22, 21),
+					offset_xy: (41, -44),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 27),
+					offset_xy: (20, -24),
+				),
+				(
+					colour: Hurt,
+					size_wh: (21, 25),
+					offset_xy: (6, -3),
+				),
+				(
+					colour: Hurt,
+					size_wh: (18, 26),
+					offset_xy: (-3, 33),
+				)
+			]
+		),
+		(
+			file: "atkMid0002cape.png",
+			exposure: 3,
+			crop_xy: (80, 68),
+			matrix_3031: (-52, -81),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (22, 21),
+					offset_xy: (41, -44),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 27),
+					offset_xy: (20, -24),
+				),
+				(
+					colour: Hurt,
+					size_wh: (21, 25),
+					offset_xy: (6, -3),
+				),
+				(
+					colour: Hurt,
+					size_wh: (18, 26),
+					offset_xy: (-3, 33),
+				),
+			]
+		),
+// Take 1, still the startup section... maybe sword spin spawns here?
+		(
+			file: "atkMid0003cape.png",
+			exposure: 2,
+			crop_xy: (69, 56),
+			matrix_3031: (-63, -93),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (21, 19),
+					offset_xy: (27, -59),
+				),
+				(
+					colour: Hurt,
+					size_wh: (17, 16),
+					offset_xy: (12, -31),
+				),
+				(
+					colour: Hurt,
+					size_wh: (17, 36),
+					offset_xy: (0, 10),
+				),
+				(
+					colour: Hurt,
+					size_wh: (12, 21),
+					offset_xy: (-25, 13),
+				),
+				(
+					colour: Hurt,
+					size_wh: (12, 13),
+					offset_xy: (-6, -66),
+				)
+			]
+		),
+		(
+			file: "atkMid0004cape.png",
+			exposure: 2,
+			crop_xy: (66, 49),
+			matrix_3031: (-66, -100),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (19, 19),
+					offset_xy: (13, -62),
+				),
+				(
+					colour: Hurt,
+					size_wh: (20, 20),
+					offset_xy: (1, -32),
+				),
+				(
+					colour: Hurt,
+					size_wh: (26, 19),
+					offset_xy: (-9, 2),
+				),
+				(
+					colour: Hurt,
+					size_wh: (35, 17),
+					offset_xy: (-16, 26),
+				),
+				(
+					colour: Hurt,
+					size_wh: (17, 17),
+					offset_xy: (32, -26),
+				)
+			]
+		),
+// Take 2, actual hitbox starts here, active frames: 18f
+		(
+			file: "atkMid0005cape.png",
+			exposure: 3,
+			crop_xy: (65, 48),
+			matrix_3031: (-67, -101),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (25, 20),
+					offset_xy: (7, -64),
+				),
+				(
+					colour: Hurt,
+					size_wh: (17, 17),
+					offset_xy: (-6, -30),
+				),
+				(
+					colour: Hurt,
+					size_wh: (26, 18),
+					offset_xy: (-13, -3),
+				),
+				(
+					colour: Hurt,
+					size_wh: (37, 19),
+					offset_xy: (-14, 24),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 25),
+					offset_xy: (28, -33),
+				),
+				(
+					colour: Hit,
+					size_wh: (35, 37),
+					offset_xy: (80, -59),
+				),
+				(
+					colour: Hit,
+					size_wh: (51, 21),
+					offset_xy: (75, -58),
+				)
+			]
+		),
+		(
+			file: "atkMid0006cape.png",
+			exposure: 3,
+			crop_xy: (50, 47),
+			matrix_3031: (-82, -102),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (28, 20),
+					offset_xy: (10, -59),
+				),
+				(
+					colour: Hurt,
+					size_wh: (19, 16),
+					offset_xy: (-6, -27),
+				),
+				(
+					colour: Hurt,
+					size_wh: (29, 17),
+					offset_xy: (-14, 0),
+				),
+				(
+					colour: Hurt,
+					size_wh: (40, 18),
+					offset_xy: (-15, 28),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 26),
+					offset_xy: (30, -29),
+				),
+				(
+					colour: Hit,
+					size_wh: (35, 42),
+					offset_xy: (80, -64),
+				),
+				(
+					colour: Hit,
+					size_wh: (51, 27),
+					offset_xy: (75, -64),
+				)
+			]
+		),
+		(
+			file: "atkMid0007cape.png",
+			exposure: 3,
+			crop_xy: (50, 47),
+			matrix_3031: (-82, -102),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (28, 20),
+					offset_xy: (10, -59),
+				),
+				(
+					colour: Hurt,
+					size_wh: (19, 16),
+					offset_xy: (-6, -27),
+				),
+				(
+					colour: Hurt,
+					size_wh: (29, 17),
+					offset_xy: (-14, 0),
+				),
+				(
+					colour: Hurt,
+					size_wh: (40, 18),
+					offset_xy: (-15, 28),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 26),
+					offset_xy: (30, -29),
+				),
+				(
+					colour: Hit,
+					size_wh: (35, 43),
+					offset_xy: (80, -65),
+				),
+				(
+					colour: Hit,
+					size_wh: (51, 28),
+					offset_xy: (75, -65),
+				)
+			]
+		),
+		(
+			file: "atkMid0008cape.png",
+			exposure: 3,
+			crop_xy: (46, 47),
+			matrix_3031: (-86, -102),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (28, 20),
+					offset_xy: (10, -59),
+				),
+				(
+					colour: Hurt,
+					size_wh: (19, 16),
+					offset_xy: (-6, -27),
+				),
+				(
+					colour: Hurt,
+					size_wh: (29, 17),
+					offset_xy: (-14, 0),
+				),
+				(
+					colour: Hurt,
+					size_wh: (40, 18),
+					offset_xy: (-15, 28),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 26),
+					offset_xy: (30, -29),
+				),
+				(
+					colour: Hit,
+					size_wh: (35, 44),
+					offset_xy: (80, -66),
+				),
+				(
+					colour: Hit,
+					size_wh: (51, 29),
+					offset_xy: (75, -66),
+				)
+			]
+		),
+		(
+			file: "atkMid0009cape.png",
+			exposure: 3,
+			crop_xy: (45, 47),
+			matrix_3031: (-87, -102),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (28, 20),
+					offset_xy: (10, -59),
+				),
+				(
+					colour: Hurt,
+					size_wh: (19, 16),
+					offset_xy: (-6, -27),
+				),
+				(
+					colour: Hurt,
+					size_wh: (29, 17),
+					offset_xy: (-14, 0),
+				),
+				(
+					colour: Hurt,
+					size_wh: (40, 18),
+					offset_xy: (-15, 28),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 26),
+					offset_xy: (30, -29),
+				),
+				(
+					colour: Hit,
+					size_wh: (35, 45),
+					offset_xy: (80, -67),
+				),
+				(
+					colour: Hit,
+					size_wh: (51, 30),
+					offset_xy: (75, -67),
+				)
+			]
+		),
+		(
+			file: "atkMid0010cape.png",
+			exposure: 3,
+			crop_xy: (43, 47),
+			matrix_3031: (-89, -102),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (28, 20),
+					offset_xy: (10, -59),
+				),
+				(
+					colour: Hurt,
+					size_wh: (19, 16),
+					offset_xy: (-6, -27),
+				),
+				(
+					colour: Hurt,
+					size_wh: (29, 17),
+					offset_xy: (-14, 0),
+				),
+				(
+					colour: Hurt,
+					size_wh: (40, 18),
+					offset_xy: (-15, 28),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 26),
+					offset_xy: (30, -29),
+				),
+				(
+					colour: Hit,
+					size_wh: (35, 45),
+					offset_xy: (80, -67),
+				),
+				(
+					colour: Hit,
+					size_wh: (51, 30),
+					offset_xy: (75, -67),
+				)
+			]
+		),
+// Take 3, Recovery frames from here on out
+		(
+			file: "atkMid0011cape.png",
+			exposure: 3,
+			crop_xy: (65, 47),
+			matrix_3031: (-67, -102),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (28, 20),
+					offset_xy: (10, -59),
+				),
+				(
+					colour: Hurt,
+					size_wh: (19, 16),
+					offset_xy: (-6, -27),
+				),
+				(
+					colour: Hurt,
+					size_wh: (29, 17),
+					offset_xy: (-14, 0),
+				),
+				(
+					colour: Hurt,
+					size_wh: (40, 18),
+					offset_xy: (-15, 28),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 26),
+					offset_xy: (30, -29),
+				)
+			]
+		),
+		(
+			file: "atkMid0011cape.png",
+			exposure: 3,
+			crop_xy: (65, 47),
+			matrix_3031: (-67, -102),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (28, 20),
+					offset_xy: (10, -59),
+				),
+				(
+					colour: Hurt,
+					size_wh: (19, 16),
+					offset_xy: (-6, -27),
+				),
+				(
+					colour: Hurt,
+					size_wh: (29, 17),
+					offset_xy: (-14, 0),
+				),
+				(
+					colour: Hurt,
+					size_wh: (40, 18),
+					offset_xy: (-15, 28),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 26),
+					offset_xy: (30, -29),
+				)
+			]
+		),
+		(
+			file: "atkMid0012cape.png",
+			exposure: 3,
+			crop_xy: (71, 29),
+			matrix_3031: (-61, -120),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (21, 20),
+					offset_xy: (5, -64),
+				),
+				(
+					colour: Hurt,
+					size_wh: (24, 26),
+					offset_xy: (-6, -30),
+				),
+				(
+					colour: Hurt,
+					size_wh: (32, 19),
+					offset_xy: (-9, 7),
+				),
+				(
+					colour: Hurt,
+					size_wh: (41, 15),
+					offset_xy: (-11, 32),
+				),
+				(
+					colour: Hurt,
+					size_wh: (35, 7),
+					offset_xy: (3, -55),
+				)
+			]
+		),
+		(
+			file: "atkMid0013cape.png",
+			exposure: 3,
+			crop_xy: (80, 43),
+			matrix_3031: (-52, -106),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (21, 20),
+					offset_xy: (1, -65),
+				),
+				(
+					colour: Hurt,
+					size_wh: (13, 16),
+					offset_xy: (-2, -33),
+				),
+				(
+					colour: Hurt,
+					size_wh: (22, 22),
+					offset_xy: (-3, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (30, 19),
+					offset_xy: (-4, 31),
+				),
+				(
+					colour: Hurt,
+					size_wh: (31, 7),
+					offset_xy: (3, -49),
+				)
+			]
+		),
+		(
+			file: "atkMid0014cape.png",
+			exposure: 3,
+			crop_xy: (53, 47),
+			matrix_3031: (-79, -102),
+			boxes: [
+				(
+					colour: Collision,
+					size_wh: (20, 55),
+					offset_xy: (0, -5),
+				),
+				(
+					colour: Hurt,
+					size_wh: (20, 67),
+					offset_xy: (0, -11),
+				)
+			]
+		)
+	]
+)

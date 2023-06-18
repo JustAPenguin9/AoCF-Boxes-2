@@ -10,6 +10,8 @@ aocf-boxes-2 [path to your .ron file]
 ```
 
 ### Current format for the .ron file
+You can view an example [here](examples/miko.ron).
+
 - Trailing commas are allowed
 - Comments can be done with `//` and `/*` `*/`
 
