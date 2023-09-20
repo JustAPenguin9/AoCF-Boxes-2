@@ -9,7 +9,7 @@ use types::{Colour, Move};
 
 #[inline]
 fn error_out<T: AsRef<str>>(msg: T) -> ! {
-	println!("{}", ansi_term::Colour::Red.bold().paint(format!("error: {}", msg.as_ref())));
+	println!("error: {}", msg.as_ref());
 
 	std::process::exit(1)
 }
@@ -123,4 +123,6 @@ fn main() {
 		}
 		_ => (),
 	}
+
+    println!("Done! Saved to `{}`", output_dir);
 }
