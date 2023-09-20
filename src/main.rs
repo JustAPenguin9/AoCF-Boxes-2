@@ -20,15 +20,19 @@ fn main() {
 	// will never error because its a required argument
 	let path = matches.get_one::<std::path::PathBuf>("input_file").unwrap();
 
-	let f = std::fs::File::open(path).expect("no file found");
+	let f = std::fs::read_to_string(path)
+		.unwrap_or_else(|_| error_out(format!("Could not open {:?}", path)));
 
-	let file: Move = match ron::de::from_reader(f) {
-		Ok(x) => x,
-		Err(e) => {
-			println!("Failed to load {path:?} {e}");
-
-			std::process::exit(1);
-		}
+	let file: Move = match matches.get_one::<String>("format").unwrap().as_str() {
+		"json" => serde_json::from_str(&f)
+			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
+		"yaml" => serde_yaml::from_str(&f)
+			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
+		"toml" => toml::from_str(&f)
+			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
+		// defaults to ron
+		_ => ron::de::from_str(&f)
+			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
 	};
 
 	// will never error because there is a default value

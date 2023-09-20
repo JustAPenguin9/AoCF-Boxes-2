@@ -10,10 +10,13 @@ aocf-boxes-2 [path to your .ron file]
 ```
 
 ### Current format for the .ron file
+**Other file formats such as JSON can be used and follow a similar structure** 
+
 You can view an example [here](examples/miko.ron).
 
 - Trailing commas are allowed
 - Comments can be done with `//` and `/*` `*/`
+
 
 (This isn't the real numbers for Reimu j5a)
 ```rs

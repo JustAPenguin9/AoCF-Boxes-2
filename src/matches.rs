@@ -28,5 +28,11 @@ pub fn get_matches() -> ArgMatches {
 			.long("outputDir")
 			.default_value("output")
 			.num_args(1))
+		.arg(Arg::new("format")
+			.help("Specify the input file's file format including:\n    ron, json, yaml, toml")
+			.short('f')
+			.long("format")
+			.default_value("ron")
+			.num_args(1))
 		.get_matches()
 }
