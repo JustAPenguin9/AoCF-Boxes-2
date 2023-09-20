@@ -9,7 +9,7 @@ use types::{Colour, Move};
 
 #[inline]
 fn error_out<T: AsRef<str>>(msg: T) -> ! {
-	println!("{}", ansi_term::Colour::Red.bold().paint(format!("error {}", msg.as_ref())));
+	println!("{}", ansi_term::Colour::Red.bold().paint(format!("error: {}", msg.as_ref())));
 
 	std::process::exit(1)
 }
@@ -48,7 +48,7 @@ fn main() {
 	let mut i = 0;
 	for image in file.images {
 		let sprite = image::open(format!("{}{}", file.directory, image.file))
-			.unwrap_or_else(|_| error_out(format!("Can not find the image {}", image.file)));
+			.unwrap_or_else(|_| error_out(format!("Could not find the image {}", image.file)));
 		let mut base = image::DynamicImage::new_rgba8(
 			sprite.width() + file.padding_tlbr.1 + file.padding_tlbr.3,
 			sprite.height() + file.padding_tlbr.0 + file.padding_tlbr.2,
@@ -108,7 +108,10 @@ fn main() {
 		(true, true) => {
 			let path = std::fs::File::create(format!("{}/{}.gif", output_dir, file.name))
 				.unwrap_or_else(|_| error_out("Could not encode the gif"));
-			let mut encoder = image::codecs::gif::GifEncoder::new_with_speed(path, file.speed.unwrap_or_else(|| 1));
+			let mut encoder = image::codecs::gif::GifEncoder::new_with_speed(
+				path,
+				file.speed.unwrap_or_else(|| 1),
+			);
 			encoder
 				.set_repeat(image::codecs::gif::Repeat::Infinite)
 				.unwrap_or_else(|_| error_out("Could not encode the gif"));

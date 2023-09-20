@@ -14,7 +14,7 @@ pub struct Image {
 	pub file: String,
 	pub exposure: Option<u32>,
 	pub crop_xy: (i32, i32),
-    pub matrix_3031: (i32, i32),
+	pub matrix_3031: (i32, i32),
 	// TODO: overlays
 	// overlays: Option<Vec<Overlay>>,
 	pub boxes: Vec<Box>,

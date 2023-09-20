@@ -23,7 +23,7 @@ pub fn get_matches() -> ArgMatches {
 			.long("noSprites")
 			.action(ArgAction::SetTrue))
 		.arg(Arg::new("output_dir")
-			.help("Set the output directory")
+			.help("Set the name of the output directory")
 			.short('o')
 			.long("outputDir")
 			.default_value("output")
