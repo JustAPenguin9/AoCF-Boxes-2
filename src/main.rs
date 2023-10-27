@@ -17,11 +17,25 @@ fn error_out<T: AsRef<str>>(msg: T) -> ! {
 fn main() {
 	let matches = get_matches();
 
+	// mostly stolen from the println macro in the standard library because macros are witchcraft
+	// definied in main to use matches
+	macro_rules! print_verbose {
+        ($($arg:tt)*) => {
+            if matches.get_flag("verbose") {
+                // println!("verbose: {}", std::format_args_nl!($($arg)*))
+                print!("verbose: ");
+                println!($($arg)*);
+            }
+        }
+    }
+
 	// will never error because its a required argument
 	let path = matches.get_one::<std::path::PathBuf>("input_file").unwrap();
+	print_verbose!("Got path to file {}", path.to_string_lossy());
 
 	let f = std::fs::read_to_string(path)
 		.unwrap_or_else(|_| error_out(format!("Could not open {:?}", path)));
+	print_verbose!("Opened file");
 
 	let file: Move = match matches.get_one::<String>("format").unwrap().as_str() {
 		"json" => serde_json::from_str(&f)
@@ -34,12 +48,14 @@ fn main() {
 		_ => ron::de::from_str(&f)
 			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
 	};
+	print_verbose!("Deserialized file");
 
 	// will never error because there is a default value
 	let output_dir = matches.get_one::<String>("output_dir").unwrap();
 	if !std::path::Path::new(output_dir).is_dir() {
 		std::fs::create_dir(output_dir)
 			.unwrap_or_else(|_| error_out("Could not create the output directory"))
+		print_verbose!("Created output folder");
 	}
 
 	let mut frames: Vec<image::Frame> = vec![];
@@ -49,10 +65,12 @@ fn main() {
 	for image in file.images {
 		let sprite = image::open(format!("{}{}", file.directory, image.file))
 			.unwrap_or_else(|_| error_out(format!("Could not find the image {}", image.file)));
+		print_verbose!("Opened image {}", image.file);
 		let mut base = image::DynamicImage::new_rgba8(
 			sprite.width() + file.padding_tlbr.1 + file.padding_tlbr.3,
 			sprite.height() + file.padding_tlbr.0 + file.padding_tlbr.2,
 		);
+		print_verbose!("Created base image");
 
 		if !matches.get_flag("no_sprites") {
 			image::imageops::overlay(
@@ -61,6 +79,7 @@ fn main() {
 				file.padding_tlbr.1.into(),
 				file.padding_tlbr.0.into(),
 			);
+			print_verbose!("Applied sprite to base");
 		}
 
 		for b in image.boxes {
@@ -84,6 +103,7 @@ fn main() {
 			let height = b.size_wh.1 * 2 + 1;
 
 			if width <= 0 || height <= 0 {
+				print_verbose!("Skipping {:?} box due to a width or height of 0", b.colour);
 				continue;
 			}
 
@@ -91,11 +111,20 @@ fn main() {
 				&mut base,
 				Rect::at(pos_x, pos_y).of_size(width, height),
 				colour,
-			)
+			);
+			print_verbose!(
+				"Drew {:?} box (x: {}, y: {}, width: {}, height: {})",
+				b.colour,
+				&pos_x,
+				&pos_y,
+				&width,
+				&height
+			);
 		}
 
 		let name = format!("{}/{}-boxes{i:02}.png", output_dir, file.name);
 		base.save(&name).unwrap_or_else(|_| error_out(format!("Could not save the image {name}")));
+		print_verbose!("Saved {}", name);
 
 		if image.exposure.is_none() {
 			can_make_gif = false
@@ -103,6 +132,9 @@ fn main() {
 			// will never error because the None case is checked above
 			for _ in 0..image.exposure.unwrap() {
 				frames.push(image::Frame::new(base.clone().into_rgba8()));
+				if matches.get_flag("gif") {
+					print_verbose!("Pushed the image onto gif stack");
+				}
 			}
 		}
 
@@ -112,10 +144,10 @@ fn main() {
 	// save the gif if needed
 	match (matches.get_flag("gif"), can_make_gif) {
 		(true, true) => {
-			let path = std::fs::File::create(format!("{}/{}.gif", output_dir, file.name))
-				.unwrap_or_else(|_| error_out("Could not encode the gif"));
+			let path = format!("{}/{}.gif", output_dir, file.name);
+			let gif = std::fs::File::create(&path)
 			let mut encoder = image::codecs::gif::GifEncoder::new_with_speed(
-				path,
+				&gif,
 				file.speed.unwrap_or_else(|| 1),
 			);
 			encoder
@@ -123,6 +155,7 @@ fn main() {
 				.unwrap_or_else(|_| error_out("Could not encode the gif"));
 
 			encoder.encode_frames(frames).unwrap_or_else(|_| error_out("Could not encode the gif"));
+			print_verbose!("Saved gif {}", path);
 		}
 		(true, false) => {
 			println!("Could not make a gif because not all images had a valid exposure")
@@ -130,5 +163,5 @@ fn main() {
 		_ => (),
 	}
 
-    println!("Done! Saved to `{}`", output_dir);
+	println!("Done! Saved to `{}`", output_dir);
 }
