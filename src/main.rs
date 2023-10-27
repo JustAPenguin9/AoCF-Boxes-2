@@ -168,5 +168,5 @@ fn main() {
 		_ => (),
 	}
 
-	println!("Done! Saved to `{}`", output_dir);
+	println!("Done! Saved to {}", output_dir);
 }
