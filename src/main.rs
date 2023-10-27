@@ -74,16 +74,22 @@ fn main() {
 				Colour::Hex(val) => Rgba((val << 8 | 0x000000FF).to_be_bytes()),
 			};
 
+			let pos_x = image.crop_xy.0 - image.matrix_3031.0 - b.size_wh.0 as i32
+				+ b.offset_xy.0 + file.padding_tlbr.1 as i32
+				+ 1;
+			let pos_y = image.crop_xy.1 - image.matrix_3031.1 - b.size_wh.1 as i32
+				+ b.offset_xy.1 + file.padding_tlbr.0 as i32;
+
+			let width = b.size_wh.0 * 2;
+			let height = b.size_wh.1 * 2 + 1;
+
+			if width <= 0 || height <= 0 {
+				continue;
+			}
+
 			imageproc::drawing::draw_hollow_rect_mut(
 				&mut base,
-				Rect::at(
-					image.crop_xy.0 - image.matrix_3031.0 - b.size_wh.0 as i32
-						+ b.offset_xy.0 + file.padding_tlbr.1 as i32
-						+ 1,
-					image.crop_xy.1 - image.matrix_3031.1 - b.size_wh.1 as i32
-						+ b.offset_xy.1 + file.padding_tlbr.0 as i32,
-				)
-				.of_size(b.size_wh.0 * 2, b.size_wh.1 * 2 + 1),
+				Rect::at(pos_x, pos_y).of_size(width, height),
 				colour,
 			)
 		}
