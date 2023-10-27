@@ -7,11 +7,12 @@ mod types;
 use matches::get_matches;
 use types::{Colour, Move};
 
-#[inline]
-fn error_out<T: AsRef<str>>(msg: T) -> ! {
-	println!("error: {}", msg.as_ref());
-
-	std::process::exit(1)
+macro_rules! error_out {
+    ($($arg:tt)*) => {{
+        print!("error: ");
+        println!($($arg)*);
+        std::process::exit(1)
+    }}
 }
 
 fn main() {
@@ -34,19 +35,20 @@ fn main() {
 	print_verbose!("Got path to file {}", path.to_string_lossy());
 
 	let f = std::fs::read_to_string(path)
-		.unwrap_or_else(|_| error_out(format!("Could not open {:?}", path)));
+		.unwrap_or_else(|_| error_out!("Could not open {}", path.to_string_lossy()));
 	print_verbose!("Opened file");
 
 	let file: Move = match matches.get_one::<String>("format").unwrap().as_str() {
 		"json" => serde_json::from_str(&f)
-			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
+			.unwrap_or_else(|e| error_out!("Failed to parse file {path:?} {e}")),
 		"yaml" => serde_yaml::from_str(&f)
-			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
-		"toml" => toml::from_str(&f)
-			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
+			.unwrap_or_else(|e| error_out!("Failed to parse file {path:?} {e}")),
+		"toml" => {
+			toml::from_str(&f).unwrap_or_else(|e| error_out!("Failed to parse file {path:?} {e}"))
+		}
 		// defaults to ron
 		_ => ron::de::from_str(&f)
-			.unwrap_or_else(|e| error_out(format!("Failed to parse file {path:?} {e}"))),
+			.unwrap_or_else(|e| error_out!("Failed to parse file {path:?} {e}")),
 	};
 	print_verbose!("Deserialized file");
 
@@ -54,7 +56,7 @@ fn main() {
 	let output_dir = matches.get_one::<String>("output_dir").unwrap();
 	if !std::path::Path::new(output_dir).is_dir() {
 		std::fs::create_dir(output_dir)
-			.unwrap_or_else(|_| error_out("Could not create the output directory"))
+			.unwrap_or_else(|_| error_out!("Could not create the output directory"));
 		print_verbose!("Created output folder");
 	}
 
@@ -64,7 +66,7 @@ fn main() {
 	let mut i = 0;
 	for image in file.images {
 		let sprite = image::open(format!("{}{}", file.directory, image.file))
-			.unwrap_or_else(|_| error_out(format!("Could not find the image {}", image.file)));
+			.unwrap_or_else(|_| error_out!("Could not find the image {}", image.file));
 		print_verbose!("Opened image {}", image.file);
 		let mut base = image::DynamicImage::new_rgba8(
 			sprite.width() + file.padding_tlbr.1 + file.padding_tlbr.3,
@@ -123,7 +125,7 @@ fn main() {
 		}
 
 		let name = format!("{}/{}-boxes{i:02}.png", output_dir, file.name);
-		base.save(&name).unwrap_or_else(|_| error_out(format!("Could not save the image {name}")));
+		base.save(&name).unwrap_or_else(|_| error_out!("Could not save the image {name}"));
 		print_verbose!("Saved {}", name);
 
 		if image.exposure.is_none() {
@@ -146,15 +148,18 @@ fn main() {
 		(true, true) => {
 			let path = format!("{}/{}.gif", output_dir, file.name);
 			let gif = std::fs::File::create(&path)
+				.unwrap_or_else(|_| error_out!("Could not encode the gif"));
 			let mut encoder = image::codecs::gif::GifEncoder::new_with_speed(
 				&gif,
 				file.speed.unwrap_or_else(|| 1),
 			);
 			encoder
 				.set_repeat(image::codecs::gif::Repeat::Infinite)
-				.unwrap_or_else(|_| error_out("Could not encode the gif"));
+				.unwrap_or_else(|_| error_out!("Could not encode the gif"));
 
-			encoder.encode_frames(frames).unwrap_or_else(|_| error_out("Could not encode the gif"));
+			encoder
+				.encode_frames(frames)
+				.unwrap_or_else(|_| error_out!("Could not encode the gif"));
 			print_verbose!("Saved gif {}", path);
 		}
 		(true, false) => {
