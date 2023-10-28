@@ -24,7 +24,7 @@ fn main() {
         ($($arg:tt)*) => {
             if matches.get_flag("verbose") {
                 // println!("verbose: {}", std::format_args_nl!($($arg)*))
-                print!("verbose: ");
+                // print!("verbose: ");
                 println!($($arg)*);
             }
         }
@@ -72,7 +72,7 @@ fn main() {
 			sprite.width() + file.padding_tlbr.1 + file.padding_tlbr.3,
 			sprite.height() + file.padding_tlbr.0 + file.padding_tlbr.2,
 		);
-		print_verbose!("Created base image");
+		print_verbose!("└── Created base image");
 
 		if !matches.get_flag("no_sprites") {
 			image::imageops::overlay(
@@ -81,9 +81,10 @@ fn main() {
 				file.padding_tlbr.1.into(),
 				file.padding_tlbr.0.into(),
 			);
-			print_verbose!("Applied sprite to base");
+			print_verbose!("└── Applied sprite to base");
 		}
 
+        print_verbose!("└── Drawing box(es)");
 		for b in image.boxes {
 			let colour = match b.colour {
 				Colour::Hit => Rgba([255u8, 0u8, 0u8, 255u8]),
@@ -105,7 +106,7 @@ fn main() {
 			let height = b.size_wh.1 * 2 + 1;
 
 			if width <= 0 || height <= 0 {
-				print_verbose!("Skipping {:?} box due to a width or height of 0", b.colour);
+				print_verbose!("│   └── Skipping {:?} box due to a width or height of 0", b.colour);
 				continue;
 			}
 
@@ -115,7 +116,7 @@ fn main() {
 				colour,
 			);
 			print_verbose!(
-				"Drew {:?} box (x: {}, y: {}, width: {}, height: {})",
+				"│   └── Drew {:?} box (x: {}, y: {}, width: {}, height: {})",
 				b.colour,
 				&pos_x,
 				&pos_y,
@@ -126,7 +127,7 @@ fn main() {
 
 		let name = format!("{}/{}-boxes{i:02}.png", output_dir, file.name);
 		base.save(&name).unwrap_or_else(|_| error_out!("Could not save the image {name}"));
-		print_verbose!("Saved {}", name);
+		print_verbose!("└── Saved {}", name);
 
 		if image.exposure.is_none() {
 			can_make_gif = false
@@ -134,10 +135,10 @@ fn main() {
 			// will never error because the None case is checked above
 			for _ in 0..image.exposure.unwrap() {
 				frames.push(image::Frame::new(base.clone().into_rgba8()));
-				if matches.get_flag("gif") {
-					print_verbose!("Pushed the image onto gif stack");
-				}
 			}
+            if matches.get_flag("gif") {
+                print_verbose!("└── Pushed the image onto gif stack {} time(s)", image.exposure.unwrap());
+            }
 		}
 
 		i += 1;
