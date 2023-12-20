@@ -1,6 +1,6 @@
 # AoCF-Boxes-2
 
-AoCF boxes 2 draws the hit, hurt and collision boxes for *Touhou Hyouibana ~ Antinomy of Common Flowers* through the use of a .ron file. AoCF boxes 2 is meant to be a replacement to the original [AoCF boxes](https://github.com/JustAPenguin9/AoCF-Boxes). Boxes 2 does everything that boxes 1 does in a quicker and cleaner fashion.
+AoCF boxes 2 draws the hit, hurt and collision boxes for *Touhou Hyouibana ~ Antinomy of Common Flowers* through the use of multiple file formats. AoCF boxes 2 is meant to be a replacement to the original [AoCF boxes](https://github.com/JustAPenguin9/AoCF-Boxes). Boxes 2 does everything that boxes 1 does in a quicker and cleaner fashion... so please don't use boxes 1. Boxes is largely built off of the work done by @fearnagae on discord and [MathyFurret](https://github.com/MathyFurret/th155-decomp).
 
 ### Downloading and running
 To use AoCF boxes 2 download the most most recent [release](https://github.com/JustAPenguin9/AoCF-Boxes-2/releases) on to your computer.
@@ -18,7 +18,7 @@ You can view an example [here](examples/miko.ron).
 - Comments can be done with `//` and `/*` `*/`
 
 
-(This isn't the real numbers for Reimu j5a)
+(These aren't the real numbers for Reimu j5a btw)
 ```rs
 // this is only needed if you don't want to wrap every optional field in "Some(#)"
 #![enable(implicit_some)]
